@@ -15,6 +15,8 @@ PASSWORD = 'Appius_2022!'
 
 QUERY = 'React Developer'
 
+data = {'name': [],'summary': [],'city': [],}
+
 #TODO ADD TOKEN ANTY CAPTCHA
 options = webdriver.ChromeOptions()
 options.add_argument("--incognito")
@@ -54,11 +56,6 @@ def search_person(query):
     sleep(4)
 
 def get_info():
-    data = {
-        'name': [],
-        'summary': [],
-        'city': [],
-    }
     #SELECT PEOPLE INFO FROM LIST
     #TODO CLEAN RESULTS FROM EMOJI AND CUSTOM UNICODE
     list_elements = driver.find_elements(by=By.CSS_SELECTOR, value="li .entity-result__content.entity-result__divider")
@@ -70,14 +67,27 @@ def get_info():
             data['name'].append(title[0].text)
             data['summary'].append(summary.text)
             data['city'].append(city.text)
-    return data
-    
+
 #SCRIPT START
 submit_login(EMAIL, PASSWORD )
 
 search_person(QUERY)
 
-df = pd.DataFrame(get_info())
+get_info()
+
+#TO THE NEXT PAGE
+driver.execute_script("window.scrollBy(0,document.body.scrollHeight)")
+sleep(4)
+next = driver.find_element(by=By.XPATH, value="//button[@aria-label='Avanti']")
+print(next.text)
+sleep(4)
+next.click()
+sleep(2)
+get_info()
+sleep(2)
+get_info()
+
+df = pd.DataFrame(data)
 df.to_csv('people.csv')
 
 while True: 
