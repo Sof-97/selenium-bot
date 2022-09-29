@@ -1,4 +1,3 @@
-import sys
 from selenium.webdriver import Chrome
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -11,9 +10,22 @@ from time import sleep
 
 LINKEDIN = 'https://it.linkedin.com/'
 
+#NOTE PARSING
+# import argparse
+# parser = argparse.ArgumentParser(description='Automatic connection bot for Linkedin.')
+# parser.add_argument("email", type=str, help="Enter the email for the linkedin account.")
+# parser.add_argument("password", type=str, help="Enter the password for the linkedin account.")
+# args = parser.parse_args()
+#ADD CHECK FOR ROLE FLAG
+
+EMAIL = 'testlinkedin2343@gmail.com'
+PASSWORD = 'Appius_2022!'
+
 ###IMPORT CSV FILE AND TEXT MESSAGE
 TEXT_MESSAGE = 'Questo è un messaggio di test automatizzato.'
+SEARCH_ACCOUNT = ['Anthony J', 'Leroy J']
 
+#TODO ADD TOKEN ANTY CAPTCHA
 options = webdriver.ChromeOptions()
 options.add_argument("--incognito")
 chrome_driver = ChromeDriverManager().install()
@@ -21,14 +33,14 @@ driver  = Chrome(service=Service(chrome_driver), options=options)
 driver.maximize_window()
 driver.get(LINKEDIN)
 
-def submit_login():
+def submit_login(user_name, user_password):
     #GET INPUT 
     username = driver.find_element(by=By.XPATH, value="//input[@name='session_key']")
     password = driver.find_element(by=By.XPATH, value="//input[@name='session_password']")
 
     #COMPILE FORM
-    username.send_keys('testlinkedin2343@gmail.com')
-    password.send_keys('Appius_2022!')
+    username.send_keys(user_name)
+    password.send_keys(user_password)
 
     #SUBMIT LOGIN
     sleep(2)
@@ -52,7 +64,9 @@ def basic_connect():
         textarea = driver.find_element(by=By.CSS_SELECTOR, value="textarea#custom-message")
         sleep(1)
         textarea.send_keys(TEXT_MESSAGE)
-        sleep(1)
+        sleep(2)
+        #TODO ADD SEND INTERACTION
+        sleep(5)
 
 def open_profile():
     sleep(2)
@@ -81,31 +95,34 @@ def open_profile():
         connect_button[0].click()
         basic_connect()
 
-submit_login()
+def send_messages(account):
+    #SELECT SEARCH INPUT   --and submit
+    search_input = driver.find_element(by=By.XPATH, value="//input[@aria-label='Cerca']")
+    search_input.send_keys(account)
+    search_input.send_keys('\uE007')
+    sleep(4)
+    #SELECT PEOPLES TAB
+    peoples_button = driver.find_elements(by=By.CSS_SELECTOR, value="ul.search-reusables__filter-list li button")
+    people_btn = [btn for btn in peoples_button if btn.text == 'Persone']
+    sleep(1)
+    people_btn[0].click()
+    sleep(4)
+    #SELECT N ITERATION OF INTERACTION BUTTONS
+    interaction_buttons = driver.find_elements(by=By.CSS_SELECTOR, value='ul.reusable-search__entity-result-list.list-style-none button')
+    #CHECK FIRST BUTTON TYPE
+    if interaction_buttons[0].text == 'Collegati':
+        interaction_buttons[0].click()
+        basic_connect()
+    else:
+        open_profile()
 
-#START FOR LOOP
 
-#SELECT SEARCH INPUT   --and submit
-search_input = driver.find_element(by=By.XPATH, value="//input[@aria-label='Cerca']")
-search_input.send_keys('Anthony J \uE007')
-sleep(4)
+#SCRIPT START
+submit_login(EMAIL, PASSWORD )
 
-#SELECT PEOPLES TAB
-peoples_button = driver.find_elements(by=By.CSS_SELECTOR, value="ul.search-reusables__filter-list li button")
-people_btn = [btn for btn in peoples_button if btn.text == 'Persone']
-sleep(1)
-people_btn[0].click()
-sleep(4)
-
-#SELECT N ITERATION OF INTERACTION BUTTONS
-interaction_buttons = driver.find_elements(by=By.CSS_SELECTOR, value='ul.reusable-search__entity-result-list.list-style-none button')
-
-#CHECK FIRST BUTTON TYPE
-if interaction_buttons[0].text == 'Collegati':
-    interaction_buttons[0].click()
-    basic_connect()
-else:
-    open_profile()
+for name in SEARCH_ACCOUNT:
+    send_messages(name)
+    #TODO SAVE PERSON INFO WITH ACCOUNT
 
 
 #KEEP ON
