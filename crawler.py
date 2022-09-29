@@ -8,6 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from time import sleep
 import pandas as pd
+from cleantext import clean
 
 LINKEDIN = 'https://it.linkedin.com/'
 EMAIL = 'testlinkedin2343@gmail.com'
@@ -64,9 +65,9 @@ def get_info():
         if len(title) > 0:
             summary = element.find_element(by=By.CSS_SELECTOR, value='div.entity-result__primary-subtitle')
             city = element.find_element(by=By.CSS_SELECTOR, value='div.entity-result__secondary-subtitle')
-            data['name'].append(title[0].text)
-            data['summary'].append(summary.text)
-            data['city'].append(city.text)
+            data['name'].append(clean(title[0].text, no_emoji=True))
+            data['summary'].append(clean(summary.text, no_emoji=True))
+            data['city'].append(clean(city.text, no_emoji=True))
 
 #SCRIPT START
 submit_login(EMAIL, PASSWORD )
@@ -76,16 +77,16 @@ search_person(QUERY)
 get_info()
 
 #TO THE NEXT PAGE
-driver.execute_script("window.scrollBy(0,document.body.scrollHeight)")
-sleep(4)
-next = driver.find_element(by=By.XPATH, value="//button[@aria-label='Avanti']")
-print(next.text)
-sleep(4)
-next.click()
-sleep(2)
-get_info()
-sleep(2)
-get_info()
+i = range(6)
+for x in i:
+    sleep(4)
+    driver.execute_script("window.scrollBy(0,document.body.scrollHeight)")
+    sleep(2)
+    next = driver.find_element(by=By.XPATH, value="//button[@aria-label='Avanti']")
+    sleep(2)
+    next.click()
+    sleep(2)
+    get_info()
 
 df = pd.DataFrame(data)
 df.to_csv('people.csv')
